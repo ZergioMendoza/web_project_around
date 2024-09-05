@@ -72,7 +72,7 @@
 }
 
 .popup__close {
-  background: url(/images/icon/close-button.svg) no-repeat transparent center;
+  background: url(../images/close-button-svgrepo-com.svg) no-repeat transparent center;
   width: 2.5rem;
   height: 2.5rem;
   border: none;
