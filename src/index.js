@@ -6,6 +6,9 @@ import PopupWithImage from "./components/PopupWithImage.js";
 import PopupWithForm from "./components/PopUpWithForms.js";
 import UserInfo from "./components/UserInfo.js";
 import FormValidator from "./components/FormValidator.js";
+import { updateUserProfile } from "./components/api.js";
+import { addCardToServer } from './components/api.js';
+import { loadCards } from './components/api.js'; 
 import {
   initialCards,
   template,
@@ -28,119 +31,112 @@ import {
   addCardPopupToggle,
 } from "./utils.js";
 
-// // Instancia de PopupWithImage
-// const popupWithImage = new PopupWithImage("#popup-image");
-
-// // Función para manejar el clic en la tarjeta
-// const handleCardClick = (imageSrc, imageAlt) => {
-//   popupWithImage.open(imageSrc, imageAlt);
-// };
-
-// // Crear una instancia de Section con las tarjetas iniciales
-// const section = new Section(
-//   {
-//     items: initialCards,
-//     renderer: createCard,
-//   },
-//   ".cards"
-// );
-
-// // Renderizar todas las tarjetas iniciales
-// section.renderItems();
-
-// // Configurar los event listeners para los popups
-// popupAddCardInstance.setEventListeners();
-// popupEditProfile.setEventListeners();
-// popupWithImage.setEventListeners();
-
-// // Configurar eventos para los botonesgit stat
-// closeButton.addEventListener("click", () => popupEditProfile.close());
-// editButton.addEventListener("click", () => {
-//   const userData = userInfo.getUserInfo();
-//   inputName.value = userData.name;
-//   inputDescription.value = userData.about;
-//   popupEditProfile.open();
-// });
-// submitButton.addEventListener("click", function (evt) {
-//   evt.preventDefault();
-//   userInfo.setUserInfo({
-//     name: inputName.value,
-//     about: inputDescription.value,
-//   });
-//   popupEditProfile.close();
-// });
-
-// // Función para manejar el envío del formulario de añadir tarjeta
-// const handleAddCardSubmit = (data) => {
-//   const card = new Card(
-//     data["title"],
-//     data["image-url"],
-//     "#mi-template",
-//     cardArea,
-//     handleCardClick
-//   );
-//   card.render();
-// };
-
-// // Función para manejar el envío del formulario de edición de perfil
-// const handleProfileEditSubmit = (data) => {
-//   userInfo.setUserInfo(data);
-// };
-
-// // Habilitar la validación de formularios
-// const enableValidation = (settings) => {
-//   const formList = Array.from(document.querySelectorAll(settings.formSelector));
-//   formList.forEach((formElement) => {
-//     const formValidator = new FormValidator(settings, formElement);
-//     formValidator.enableValidation();
-//   });
-// };
-
-// // Llamada para habilitar la validación con los selectores y clases específicas
-// enableValidation({
-//   formSelector: ".popup__container",
-//   inputSelector: ".popup__input",
-//   submitButtonSelector: ".popup__submit",
-//   inactiveButtonClass: "popup__submit_inactive",
-//   inputErrorClass: "popup__input_type_error",
-//   errorClass: "popup__input-error",
-// });
 
 
-// 
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const cards = await loadCards(); // Cargar las tarjetas desde el servidor
 
+    cards.forEach(cardData => {
+      const card = new Card(
+        cardData.name,      // Nombre de la tarjeta
+        cardData.link,      // Link de la imagen
+        cardData.likes,     // Array de "me gusta"
+        '#mi-template',     // Template selector
+        document.getElementById('card'), // Contenedor de las tarjetas
+        handleCardClick     // Callback para cuando se haga clic en la imagen
+      );
 
-// import Card from "./Card.js";
-// import {
-//   initialCards,
-//   template,
-//   cardArea,
-//   openCards,
-//   closeEscape,
-//   dblclickClose,
-//   dblclickClosed,
-//   popupAddCard,
-//   inputCardLink,
-//   inputCardName,
-//   addCardPopupToggle,
-//   popupToggle,
-//   closeButton,
-//   editButton,
-//   submitButton,
-//   profileName,
-//   profileAbout,
-//   inputName,
-//   inputDescription,
-// } from "./utils.js";
-// import FormValidator from "./FormValidator.js";
-
-// Inicializar las tarjetas
-initialCards.forEach((cardData) => {
-  const card = new Card(cardData.name, cardData.link, "#mi-template", cardArea,
-  function(){"abrir la carta del popUp"});
-  card.render();
+      card.render(); // Renderizamos cada tarjeta
+    });
+  } catch (error) {
+    console.error('Error al cargar las tarjetas:', error);
+  }
 });
 
+// --------------------------------------------
+
+// Seleccionar el formulario de añadir tarjeta
+const formAddCard = document.querySelector('#add-card-form');
+const inputTitle = document.querySelector('#input-title');
+const inputUrl = document.querySelector('#input-url');
+
+// Lógica para manejar el envío del formulario
+formAddCard.addEventListener('submit', function(event) {
+  event.preventDefault(); // Evitar comportamiento predeterminado
+
+  const title = inputTitle.value; // Obtener título de la tarjeta
+  const imageUrl = inputUrl.value; // Obtener URL de la imagen
+
+  // Llamamos a la función para enviar la tarjeta al servidor
+  addCardToServer(title, imageUrl)
+    .then((newCard) => {
+      // Crear la nueva tarjeta y renderizarla en el DOM
+      const card = new Card(newCard.name, newCard.link, '#mi-template', cardArea, () => {
+        console.log('Tarjeta clickeada');
+      });
+      card.render(); // Renderizar la nueva tarjeta
+
+      // Limpiar los campos del formulario
+      formAddCard.reset();
+
+      // Cerrar el popup de añadir tarjeta
+      closePopup(document.getElementById('popup-card-form'));
+    })
+    .catch((err) => {
+      console.error(`Error al añadir la tarjeta: ${err}`);
+    });
+});
+
+
+
+
+
+
+
+
+
+// Selecciona el formulario de perfil
+const profileForm = document.querySelector("#popup-edit-profile form");
+
+// Función para actualizar la UI del perfil
+const updateProfileUI = (name, about) => {
+  const profileName = document.querySelector(".profile__name");
+  const profileAbout = document.querySelector(".profile__about");
+
+  // Actualizar los elementos del DOM con los nuevos valores
+  profileName.textContent = name;
+  profileAbout.textContent = about;
+};
+
+// Manejar el evento de envío del formulario de edición de perfil
+profileForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const nameInput = document.querySelector("#input-name").value;
+  const aboutInput = document.querySelector("#input-about").value;
+
+  // Llamar a la función para actualizar el perfil en el servidor
+  updateUserProfile(nameInput, aboutInput)
+    .then((data) => {
+      updateProfileUI(data.name, data.about); // Actualizar la UI con los datos nuevos
+      closePopup(); // Si tienes una función para cerrar el popup, úsala aquí
+    })
+    .catch((err) => {
+      console.error("Error actualizando el perfil:", err);
+    });
+});
+
+function handleCardClick(link, name) {
+  // imagePopup.open(link, name); // Abre el popup con la imagen
+  const imagePopup = new PopupWithImage('.popup-image'); // Asegúrate de que esto esté definido antes de usarlo
+
+}
+
+function renderCards(cardData) {
+  const card = new Card(cardData.name, cardData.link, "#mi-template", cardArea, handleCardClick);
+  card.render();
+}
 // Configurar los event listeners
 openCards();
 closeEscape();
@@ -183,3 +179,4 @@ submitButton.addEventListener("click", function (evt) {
   profileAbout.textContent = inputDescription.value;
   popupToggle();
 });
+

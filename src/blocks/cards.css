@@ -72,6 +72,17 @@
   margin: 0;
 }
 
+.cards__like-count {
+  font-size: 1rem;
+  margin-left: 10px;
+  color: #666;
+}
+
+/* Color cuando la tarjeta tiene un "me gusta" */
+.cards__like-color {
+  color: red; /* Cambia a un color que prefieras */
+}
+
 @media screen and (max-width: 992px) {
   .cards {
     grid-template-columns: repeat(2, 1fr);
