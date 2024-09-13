@@ -133,3 +133,62 @@ export const loadCards = () => {
 document.addEventListener('DOMContentLoaded', () => {
   loadCards();
 });
+
+
+// -----------------------------
+// punto 8 anadir y eliminar me gusta
+export const addLike = (cardId) => {
+  return fetch(`https://around.nomoreparties.co/v1/${groupId}/cards/likes/${cardId}`, {
+    method: 'PUT',
+    headers: {
+      authorization: token,
+      'Content-Type': 'application/json'
+    }
+  })
+  .then((res) => {
+    if (!res.ok) {
+      return Promise.reject(`Error: ${res.status}`);
+    }
+    return res.json(); // Retornamos el JSON actualizado
+  });
+};
+
+// Función para quitar "me gusta" de una tarjeta
+export const removeLike = (cardId) => {
+  return fetch(`https://around.nomoreparties.co/v1/${groupId}/cards/likes/${cardId}`, {
+    method: 'DELETE',
+    headers: {
+      authorization: token,
+      'Content-Type': 'application/json'
+    }
+  })
+  .then((res) => {
+    if (!res.ok) {
+      return Promise.reject(`Error: ${res.status}`);
+    }
+    return res.json(); // Retornamos el JSON actualizado
+  });
+};
+
+// ___________________________
+// editar imagen de perfil
+// api.js
+
+const BASE_URL = 'https://around.nomoreparties.co/v1/web_es_11'; // Asegúrate de que la URL base sea correcta
+
+// Función para actualizar la imagen de perfil
+export function updateUserAvatar(url) {
+  return fetch(`${BASE_URL}/users/me/avatar`, {
+    method: 'PATCH',
+    headers: {
+      authorization: '973de3af-50d3-4d36-a3b6-c4529a18880b', // Tu token
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ avatar: url }),
+  }).then((res) => {
+    if (!res.ok) {
+      return Promise.reject(`Error: ${res.status}`);
+    }
+    return res.json();
+  });
+}

@@ -1,4 +1,6 @@
-import Api from "./components/api.js"
+
+import { updateUserAvatar } from "./components/api.js";
+import Api from "./components/api.js";
 import "./components/index.css";
 import Section from "./components/Section.js";
 import Card from "./components/Card.js";
@@ -6,11 +8,8 @@ import PopupWithImage from "./components/PopupWithImage.js";
 import PopupWithForm from "./components/PopUpWithForms.js";
 import UserInfo from "./components/UserInfo.js";
 import FormValidator from "./components/FormValidator.js";
-import { updateUserProfile } from "./components/api.js";
-import { addCardToServer } from './components/api.js';
-import { loadCards } from './components/api.js'; 
+import { updateUserProfile, addCardToServer, loadCards } from './components/api.js'; 
 import {
-  initialCards,
   template,
   cardArea,
   popupAddCard,
@@ -31,24 +30,57 @@ import {
   addCardPopupToggle,
 } from "./utils.js";
 
+const changeAvatarPopup = new PopupWithForm('#popup-change-avatar', handleAvatarSubmit);
+
+// Manejar el evento de clic en el ícono de edición del avatar
+const avatarEditIcon = document.querySelector('.profile__avatar-edit-icon');
+
+avatarEditIcon.addEventListener('click', () => {
+  changeAvatarPopup.open(); // Abre el popup
+});
+
+// Función que se llama al enviar el formulario
+function handleAvatarSubmit(formData) {
+  const avatarUrl = formData['avatar-url']; // Obtiene la URL de la nueva imagen
+  
+  updateUserAvatar(avatarUrl)
+    .then(() => {
+      document.querySelector('.profile__avatar').src = avatarUrl; // Actualiza la imagen de perfil
+      changeAvatarPopup.close(); // Cierra el popup después de actualizar
+    })
+    .catch((error) => {
+      console.error('Error al cambiar la imagen de perfil:', error);
+    });
+}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+// Instancia de la API
+const api = new Api({
+  baseUrl: 'https://around.nomoreparties.co/v1/groupId',
+  headers: {
+    authorization: 'tu-token',
+    'Content-Type': 'application/json'
+  }
+});
+
+// Cargar tarjetas desde el servidor al cargar la página
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const cards = await loadCards(); // Cargar las tarjetas desde el servidor
 
-    cards.forEach(cardData => {
-      const card = new Card(
-        cardData.name,      // Nombre de la tarjeta
-        cardData.link,      // Link de la imagen
-        cardData.likes,     // Array de "me gusta"
-        '#mi-template',     // Template selector
-        document.getElementById('card'), // Contenedor de las tarjetas
-        handleCardClick     // Callback para cuando se haga clic en la imagen
-      );
-
-      card.render(); // Renderizamos cada tarjeta
-    });
+    renderCards(cards); // Renderizamos todas las tarjetas
   } catch (error) {
     console.error('Error al cargar las tarjetas:', error);
   }
@@ -61,7 +93,7 @@ const formAddCard = document.querySelector('#add-card-form');
 const inputTitle = document.querySelector('#input-title');
 const inputUrl = document.querySelector('#input-url');
 
-// Lógica para manejar el envío del formulario
+// Lógica para manejar el envío del formulario de añadir tarjeta
 formAddCard.addEventListener('submit', function(event) {
   event.preventDefault(); // Evitar comportamiento predeterminado
 
@@ -72,9 +104,7 @@ formAddCard.addEventListener('submit', function(event) {
   addCardToServer(title, imageUrl)
     .then((newCard) => {
       // Crear la nueva tarjeta y renderizarla en el DOM
-      const card = new Card(newCard.name, newCard.link, '#mi-template', cardArea, () => {
-        console.log('Tarjeta clickeada');
-      });
+      const card = new Card(newCard.name, newCard.link, newCard.likes, '#mi-template', cardArea, handleCardClick);
       card.render(); // Renderizar la nueva tarjeta
 
       // Limpiar los campos del formulario
@@ -88,23 +118,13 @@ formAddCard.addEventListener('submit', function(event) {
     });
 });
 
-
-
-
-
-
-
-
+// --------------------------------------------
 
 // Selecciona el formulario de perfil
 const profileForm = document.querySelector("#popup-edit-profile form");
 
 // Función para actualizar la UI del perfil
 const updateProfileUI = (name, about) => {
-  const profileName = document.querySelector(".profile__name");
-  const profileAbout = document.querySelector(".profile__about");
-
-  // Actualizar los elementos del DOM con los nuevos valores
   profileName.textContent = name;
   profileAbout.textContent = about;
 };
@@ -120,29 +140,43 @@ profileForm.addEventListener("submit", (event) => {
   updateUserProfile(nameInput, aboutInput)
     .then((data) => {
       updateProfileUI(data.name, data.about); // Actualizar la UI con los datos nuevos
-      closePopup(); // Si tienes una función para cerrar el popup, úsala aquí
+      closePopup(document.querySelector("#popup-edit-profile")); // Cerrar popup
     })
     .catch((err) => {
       console.error("Error actualizando el perfil:", err);
     });
 });
 
+// Función para manejar clic en la imagen de la tarjeta (abrir popup de imagen)
 function handleCardClick(link, name) {
-  // imagePopup.open(link, name); // Abre el popup con la imagen
-  const imagePopup = new PopupWithImage('.popup-image'); // Asegúrate de que esto esté definido antes de usarlo
-
+  const imagePopup = new PopupWithImage('.popup-image');
+  imagePopup.open(link, name); // Abre el popup con la imagen
 }
 
-function renderCards(cardData) {
-  const card = new Card(cardData.name, cardData.link, "#mi-template", cardArea, handleCardClick);
-  card.render();
+// Renderizar las tarjetas en el contenedor
+function renderCards(cardsArray) {
+  cardsArray.forEach(cardData => {
+    const card = new Card(
+      cardData.name, 
+      cardData.link, 
+      cardData.likes, 
+      '#mi-template', 
+      cardArea, 
+      handleCardClick
+    );
+    card.render(); // Renderizamos cada tarjeta
+  });
 }
-// Configurar los event listeners
+
+// --------------------------------------------
+
+// Configurar los event listeners para los popups y otras acciones
 openCards();
 closeEscape();
 dblclickClose();
 dblclickClosed();
 
+// Habilitar la validación de formularios
 const enableValidation = (settings) => {
   const formList = Array.from(document.querySelectorAll(settings.formSelector));
 
@@ -156,7 +190,7 @@ popupAddCard.addEventListener("submit", function (evt) {
   evt.preventDefault();
   const cardName = inputCardName.value;
   const cardLink = inputCardLink.value;
-  const card = new Card(cardName, cardLink, "#mi-template", cardArea);
+  const card = new Card(cardName, cardLink, [], "#mi-template", cardArea);
   card.render();
   addCardPopupToggle();
 });
@@ -171,6 +205,7 @@ enableValidation({
   errorClass: "popup__input-error", // Clase para mostrar el mensaje de error
 });
 
+// Listeners para abrir y cerrar popups
 closeButton.addEventListener("click", popupToggle);
 editButton.addEventListener("click", popupToggle);
 submitButton.addEventListener("click", function (evt) {
@@ -179,4 +214,3 @@ submitButton.addEventListener("click", function (evt) {
   profileAbout.textContent = inputDescription.value;
   popupToggle();
 });
-

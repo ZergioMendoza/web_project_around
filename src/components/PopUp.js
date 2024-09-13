@@ -49,3 +49,5 @@ export default class Popup {
     }
   }
   
+// ____________________________________
+  // Crear una instancia de Popup para el popup de cambiar la imagen de perfil

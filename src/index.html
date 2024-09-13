@@ -11,7 +11,7 @@
       <img src="../logo.svg" alt="logo-image" class="header__logo" />
     </header>
     <main id="main">
-      <section class="profile">
+      <!-- <section class="profile">
         <img
           src="/src/images/img-profile.jpg"
           alt=""
@@ -23,7 +23,52 @@
           <p class="profile__about">Explorador</p>
           <button class="profile__add-button"></button>
         </div>
+      </section> -->
+
+      <section class="profile">
+        <div class="profile__avatar-container">
+          <!-- Imagen de perfil con un contenedor para el ícono de edición -->
+          <img
+            src="/src/images/img-profile.jpg"  
+            alt="Avatar de perfil"
+            class="profile__avatar"
+          />
+          <!-- Ícono de edición que aparece al hacer hover sobre el avatar -->
+          <div class="profile__avatar-edit-icon">
+            <img src="./images/Vector.svg" alt="edit profile" />
+          </div>
+        </div>
+      
+        <div class="profile__info">
+          <h1 class="profile__name">Jacques Cousteau</h1> <!-- El nombre del usuario desde la API -->
+          <button class="profile__edit-button"></button> <!-- Botón para editar el perfil -->
+          <p class="profile__about">Explorador</p> <!-- Descripción del usuario desde la API -->
+          <button class="profile__add-button"></button> <!-- Botón para añadir tarjetas -->
+        </div>
       </section>
+      
+      <!-- Popup para cambiar la foto de perfil -->
+<div class="popup" id="popup-change-avatar">
+  <form action="#" class="popup__container">
+    <h2 class="popup__title">Cambiar Imagen de Perfil</h2>
+    <input
+      type="url"
+      class="popup__input popup__input-avatar"
+      name="avatar-url"
+      placeholder="URL de la nueva imagen"
+      required
+      id="input-avatar-url"
+    />
+    <span class="popup__input-error input-avatar-error"></span>
+    <button type="submit" class="popup__submit">Guardar</button>
+    <img
+      src="./images/icon/close-button.svg"
+      alt="boton para cerrar"
+      class="popup__close"
+    />
+  </form>
+</div>
+
 
       <!-- Popup de edición de perfil -->
       <div class="popup" id="popup-edit-profile">
@@ -109,6 +154,7 @@
           />
         </form>
       </div>
+
 
       <div class="cards" id="card"></div>
 
