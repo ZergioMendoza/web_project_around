@@ -8,34 +8,22 @@
   </head>
   <body class="page">
     <header class="header">
-      <img src="../logo.svg" alt="logo-image" class="header__logo" />
+      <img src="<%=require('./images/logo.svg')%>" alt="logo-image" class="header__logo" /> 
     </header>
     <main id="main">
-      <!-- <section class="profile">
-        <img
-          src="/src/images/img-profile.jpg"
-          alt=""
-          class="profile__avatar"
-        />
-        <div class="profile__info">
-          <h1 class="profile__name">Jacques Cousteau</h1>
-          <button class="profile__edit-button"></button>
-          <p class="profile__about">Explorador</p>
-          <button class="profile__add-button"></button>
-        </div>
-      </section> -->
+     
 
       <section class="profile">
         <div class="profile__avatar-container">
           <!-- Imagen de perfil con un contenedor para el ícono de edición -->
           <img
-            src="/src/images/img-profile.jpg"  
+            src="<%=require('./images/img-profile.jpg')%>"  
             alt="Avatar de perfil"
             class="profile__avatar"
           />
           <!-- Ícono de edición que aparece al hacer hover sobre el avatar -->
           <div class="profile__avatar-edit-icon">
-            <img src="./images/Vector.svg" alt="edit profile" />
+            <img src="<%=require('./images/Vector.svg')%>" alt="edit profile" />  
           </div>
         </div>
       
@@ -47,6 +35,42 @@
         </div>
       </section>
       
+      <div class="popup" id="popup-edit-profile">
+        <form action="#" class="popup__container">
+          <h2 class="popup__title">Editar perfil</h2>
+          <input
+            type="text"
+            class="popup__input popup__input-name"
+            name="name"
+            value="Jacques Cousteau"
+            placeholder="Nombre"
+            minlength="2"
+            maxlength="40"
+            id="input-name"
+            required
+          />
+          <span class="popup__input-error input-name-error"></span>
+          <input
+            type="text"
+            class="popup__input popup__input-about"
+            name="about"
+            value="Explorador"
+            placeholder="Sobre mí"
+            minlength="2"
+            maxlength="40"
+            required
+            id="input-about"
+          />
+          <span class="popup__input-error input-about-error"></span>
+          <button type="submit" class="popup__submit">Guardar</button>
+          <img
+          src="<%=require('./images/icon/close-button.svg')%>"
+            alt="boton para cerrar"
+            class="popup__close"
+          />
+        </form>
+      </div>
+
       <!-- Popup para cambiar la foto de perfil -->
 <div class="popup" id="popup-change-avatar">
   <form action="#" class="popup__container">
@@ -62,7 +86,7 @@
     <span class="popup__input-error input-avatar-error"></span>
     <button type="submit" class="popup__submit">Guardar</button>
     <img
-      src="./images/icon/close-button.svg"
+      src="<%=require('./images/icon/close-button.svg')%>"
       alt="boton para cerrar"
       class="popup__close"
     />
@@ -100,7 +124,7 @@
           <span class="popup__input-error input-about-error"></span>
           <button type="submit" class="popup__submit">Guardar</button>
           <img
-            src="./images/icon/close-button.svg"
+             src="<%=require('./images/icon/close-button.svg')%>"
             alt="boton para cerrar"
             class="popup__close"
           />
@@ -115,7 +139,7 @@
           <!-- Contenedor para leyenda -->
         </div>
         <img
-          src="./images/icon/close-button.svg"
+        src="<%=require('./images/icon/close-button.svg')%>"
           alt="boton para cerrar"
           class="popup__close"
         />
@@ -148,12 +172,26 @@
           <span class="popup__input-error input-url-error"></span>
           <button type="submit" class="popup__submit" disabled>Crear</button>
           <img
-            src="./images/icon/close-button.svg"
+             src="<%=require('./images/icon/close-button.svg')%>"
             alt="boton para cerrar"
             class="popup__close"
           />
         </form>
       </div>
+<!-- Popup de Confirmación para Borrar Tarjeta -->
+<div class="popup" id="popup-confirmation">
+  <form action="#" class="popup__container">
+    <h2 class="popup__title">¿Estás seguro?</h2>
+    <p class="popup__text">¿Estás seguro de que deseas eliminar esta tarjeta?</p>
+    <button type="submit" class="popup__submit">Sí</button>
+    <button type="button" class="popup__cancel">No</button>
+    <img
+      src="<%=require('./images/icon/close-button.svg')%>"
+      alt="boton para cerrar"
+      class="popup__close"
+    />
+  </form>
+</div>
 
 
       <div class="cards" id="card"></div>
@@ -181,3 +219,6 @@
     
   </body>
 </html>
+
+
+

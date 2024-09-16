@@ -1,14 +1,12 @@
-
-import { updateUserAvatar } from "./components/api.js";
-import Api from "./components/api.js";
+import PopupWithConfirmation from './components/PopupWithConfirmation.js'; // Ajusta la ruta según tu estructura de carpetas
 import "./components/index.css";
-import Section from "./components/Section.js";
+import Api from "./components/api.js";
 import Card from "./components/Card.js";
-import PopupWithImage from "./components/PopupWithImage.js";
+import Section from "./components/Section.js";
 import PopupWithForm from "./components/PopUpWithForms.js";
 import UserInfo from "./components/UserInfo.js";
 import FormValidator from "./components/FormValidator.js";
-import { updateUserProfile, addCardToServer, loadCards } from './components/api.js'; 
+import PopupWithImage from './components/PopupWithImage.js'; // Asegúrate de importar PopupWithImage
 import {
   template,
   cardArea,
@@ -30,98 +28,90 @@ import {
   addCardPopupToggle,
 } from "./utils.js";
 
-const changeAvatarPopup = new PopupWithForm('#popup-change-avatar', handleAvatarSubmit);
+// Instancia de la API
+const api = new Api({
+  baseUrl: 'https://around.nomoreparties.co/v1/web_es_11',
+  headers: {
+    authorization: '973de3af-50d3-4d36-a3b6-c4529a18880b', // Coloca tu token real aquí
+    'Content-Type': 'application/json'
+  }
+});
 
-// Manejar el evento de clic en el ícono de edición del avatar
+// Popup para cambiar avatar
+const changeAvatarPopup = new PopupWithForm('#popup-change-avatar', handleAvatarSubmit);
 const avatarEditIcon = document.querySelector('.profile__avatar-edit-icon');
 
 avatarEditIcon.addEventListener('click', () => {
   changeAvatarPopup.open(); // Abre el popup
 });
 
-// Función que se llama al enviar el formulario
-function handleAvatarSubmit(formData) {
-  const avatarUrl = formData['avatar-url']; // Obtiene la URL de la nueva imagen
-  
-  updateUserAvatar(avatarUrl)
-    .then(() => {
-      document.querySelector('.profile__avatar').src = avatarUrl; // Actualiza la imagen de perfil
-      changeAvatarPopup.close(); // Cierra el popup después de actualizar
-    })
-    .catch((error) => {
-      console.error('Error al cambiar la imagen de perfil:', error);
-    });
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Instancia de la API
-const api = new Api({
-  baseUrl: 'https://around.nomoreparties.co/v1/groupId',
-  headers: {
-    authorization: 'tu-token',
-    'Content-Type': 'application/json'
-  }
-});
-
-// Cargar tarjetas desde el servidor al cargar la página
+// Cargar el perfil del usuario y las tarjetas al cargar la página
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const cards = await loadCards(); // Cargar las tarjetas desde el servidor
+    const userData = await api.getUserProfile(); // Cargar el perfil del usuario
+    profileName.textContent = userData.name; // Actualiza el nombre del perfil
+    profileAbout.textContent = userData.about; // Actualiza la descripción del perfil
+    document.querySelector('.profile__avatar').src = userData.avatar; // Actualiza la imagen de perfil
 
-    renderCards(cards); // Renderizamos todas las tarjetas
+    const cards = await api.getInitialCards(); // Cargar las tarjetas desde el servidor
+    renderizarCards(cards, userData._id); // Renderizamos todas las tarjetas
+
+    // Habilitar la validación de formularios
+    const settings = {
+      formSelector: '.popup__container', // Selector del formulario
+      inputSelector: '.popup__input', // Selector de los campos de entrada
+      submitButtonSelector: '.popup__submit', // Selector del botón de envío
+      inactiveButtonClass: 'popup__submit_inactive', // Clase para desactivar el botón de envío
+      inputErrorClass: 'popup__input_type_error', // Clase para resaltar el campo de entrada con error
+      errorClass: 'popup__input-error', // Clase para mostrar el mensaje de error
+    };
+
+    enableValidation(settings); // Llama a la función para habilitar la validación
+
   } catch (error) {
-    console.error('Error al cargar las tarjetas:', error);
+    console.error('Error al cargar el perfil o las tarjetas:', error);
   }
 });
 
 // --------------------------------------------
 
-// Seleccionar el formulario de añadir tarjeta
-const formAddCard = document.querySelector('#add-card-form');
-const inputTitle = document.querySelector('#input-title');
-const inputUrl = document.querySelector('#input-url');
-
 // Lógica para manejar el envío del formulario de añadir tarjeta
-formAddCard.addEventListener('submit', function(event) {
+popupAddCard.addEventListener('submit', async function (event) {
   event.preventDefault(); // Evitar comportamiento predeterminado
 
-  const title = inputTitle.value; // Obtener título de la tarjeta
-  const imageUrl = inputUrl.value; // Obtener URL de la imagen
+  const title = inputCardName.value.trim(); // Obtener título de la tarjeta
+  const imageUrl = inputCardLink.value.trim(); // Obtener URL de la imagen
 
-  // Llamamos a la función para enviar la tarjeta al servidor
-  addCardToServer(title, imageUrl)
-    .then((newCard) => {
-      // Crear la nueva tarjeta y renderizarla en el DOM
-      const card = new Card(newCard.name, newCard.link, newCard.likes, '#mi-template', cardArea, handleCardClick);
-      card.render(); // Renderizar la nueva tarjeta
+  if (!title || !imageUrl) {
+    console.error('El título y la URL de la imagen son obligatorios.');
+    return;
+  }
 
-      // Limpiar los campos del formulario
-      formAddCard.reset();
+  try {
+    const newCard = await api.addCard(title, imageUrl); // Llamamos a la función para enviar la tarjeta al servidor
+    const card = new Card(newCard, '#mi-template', cardArea, handleCardClick, userData._id, someEventToOpenPopup);
+    cardArea.append(card.createCard()); // Añadir la tarjeta al contenedor
 
-      // Cerrar el popup de añadir tarjeta
-      closePopup(document.getElementById('popup-card-form'));
-    })
-    .catch((err) => {
-      console.error(`Error al añadir la tarjeta: ${err}`);
-    });
+    // Limpiar los campos del formulario
+    popupAddCard.reset();
+
+    // Cerrar el popup de añadir tarjeta
+    addCardPopupToggle();
+  } catch (err) {
+    console.error(`Error al añadir la tarjeta: ${err}`);
+  }
 });
 
 // --------------------------------------------
+function renderizarCards(cardsArray, userId) {
+  cardsArray.forEach(cardData => {
+    const card = new Card(cardData, '#mi-template', cardArea, handleCardClick, userId, someEventToOpenPopup);
+    cardArea.append(card.createCard()); // Añadir la tarjeta al contenedor
+  });
+}
 
 // Selecciona el formulario de perfil
-const profileForm = document.querySelector("#popup-edit-profile form");
+const profileForm = document.querySelector('#popup-edit-profile form');
 
 // Función para actualizar la UI del perfil
 const updateProfileUI = (name, about) => {
@@ -130,21 +120,27 @@ const updateProfileUI = (name, about) => {
 };
 
 // Manejar el evento de envío del formulario de edición de perfil
-profileForm.addEventListener("submit", (event) => {
+profileForm.addEventListener('submit', async (event) => {
   event.preventDefault();
 
-  const nameInput = document.querySelector("#input-name").value;
-  const aboutInput = document.querySelector("#input-about").value;
+  const nameInput = inputName.value; // Obtener el nombre del input
+  const aboutInput = inputDescription.value; // Obtener la descripción del input
+  
+  const submitButton = event.target.querySelector('.popup__submit');
+  submitButton.textContent = 'Guardando...';
+  submitButton.disabled = true;
 
-  // Llamar a la función para actualizar el perfil en el servidor
-  updateUserProfile(nameInput, aboutInput)
-    .then((data) => {
-      updateProfileUI(data.name, data.about); // Actualizar la UI con los datos nuevos
-      closePopup(document.querySelector("#popup-edit-profile")); // Cerrar popup
-    })
-    .catch((err) => {
-      console.error("Error actualizando el perfil:", err);
-    });
+  try {
+    const data = await api.updateUserProfile(nameInput, aboutInput); // Llamar a la función para actualizar el perfil en el servidor
+    updateProfileUI(data.name, data.about); // Actualizar la UI con los datos nuevos
+    popupToggle(); // Cerrar popup
+  } catch (err) {
+    console.error('Error actualizando el perfil:', err);
+  } finally {
+    // Restaurar el texto del botón y habilitarlo de nuevo
+    submitButton.textContent = 'Guardar'; 
+    submitButton.disabled = false;
+  }
 });
 
 // Función para manejar clic en la imagen de la tarjeta (abrir popup de imagen)
@@ -153,22 +149,29 @@ function handleCardClick(link, name) {
   imagePopup.open(link, name); // Abre el popup con la imagen
 }
 
-// Renderizar las tarjetas en el contenedor
-function renderCards(cardsArray) {
-  cardsArray.forEach(cardData => {
-    const card = new Card(
-      cardData.name, 
-      cardData.link, 
-      cardData.likes, 
-      '#mi-template', 
-      cardArea, 
-      handleCardClick
-    );
-    card.render(); // Renderizamos cada tarjeta
-  });
+// Inicializar el popup de confirmación
+const confirmationPopup = new PopupWithConfirmation('#popup-confirmation', handleCardDelete);
+
+// Manejar la eliminación de la tarjeta
+function handleCardDelete(cardId) {
+  api.deleteCard(cardId)
+    .then(() => {
+      const cardElement = document.querySelector(`.cards__card[data-id='${cardId}']`);
+      if (cardElement) {
+        cardElement.remove();
+      }
+      confirmationPopup.close(); // Cerrar el popup después de eliminar
+    })
+    .catch((err) => {
+      console.error('Error al eliminar la tarjeta:', err);
+    });
 }
 
-// --------------------------------------------
+// Función para abrir el popup de confirmación
+function someEventToOpenPopup(cardId) {
+  confirmationPopup.setCardId(cardId); // Establecer el ID de la tarjeta que se desea eliminar
+  confirmationPopup.open(); // Abrir el popup de confirmación
+}
 
 // Configurar los event listeners para los popups y otras acciones
 openCards();
@@ -186,31 +189,115 @@ const enableValidation = (settings) => {
   });
 };
 
-popupAddCard.addEventListener("submit", function (evt) {
-  evt.preventDefault();
-  const cardName = inputCardName.value;
-  const cardLink = inputCardLink.value;
-  const card = new Card(cardName, cardLink, [], "#mi-template", cardArea);
-  card.render();
-  addCardPopupToggle();
-});
-
 // Llamada para habilitar la validación con los selectores y clases específicas
 enableValidation({
-  formSelector: ".popup__container", // Selector del formulario
-  inputSelector: ".popup__input", // Selector de los campos de entrada
-  submitButtonSelector: ".popup__submit", // Selector del botón de envío
-  inactiveButtonClass: "popup__submit_inactive", // Clase para desactivar el botón de envío
-  inputErrorClass: "popup__input_type_error", // Clase para resaltar el campo de entrada con error
-  errorClass: "popup__input-error", // Clase para mostrar el mensaje de error
+  formSelector: '.popup__container', // Selector del formulario
+  inputSelector: '.popup__input', // Selector de los campos de entrada
+  submitButtonSelector: '.popup__submit', // Selector del botón de envío
+  inactiveButtonClass: 'popup__submit_inactive', // Clase para desactivar el botón de envío
+  inputErrorClass: 'popup__input_type_error', // Clase para resaltar el campo de entrada con error
+  errorClass: 'popup__input-error', // Clase para mostrar el mensaje de error
 });
 
 // Listeners para abrir y cerrar popups
-closeButton.addEventListener("click", popupToggle);
-editButton.addEventListener("click", popupToggle);
-submitButton.addEventListener("click", function (evt) {
+closeButton.addEventListener('click', popupToggle);
+editButton.addEventListener('click', popupToggle);
+submitButton.addEventListener('click', function (evt) {
   evt.preventDefault();
   profileName.textContent = inputName.value;
   profileAbout.textContent = inputDescription.value;
   popupToggle();
 });
+
+// Función que se llama al enviar el formulario para cambiar el avatar
+async function handleAvatarSubmit(formData) {
+  const avatarUrl = formData['avatar-url']; // Obtiene la URL de la nueva imagen
+  
+  const submitButton = document.querySelector('#popup-change-avatar .popup__submit');
+  submitButton.textContent = 'Guardando...';
+  submitButton.disabled = true;
+
+  try {
+    await api.updateUserAvatar(avatarUrl); // Llama a la API para actualizar el avatar
+    document.querySelector('.profile__avatar').src = avatarUrl; // Actualiza la imagen de perfil
+    changeAvatarPopup.close(); // Cierra el popup después de actualizar
+  } catch (error) {
+    console.error('Error al cambiar la imagen de perfil:', error);
+  } finally {
+    submitButton.textContent = 'Guardar';
+    submitButton.disabled = false;
+  }
+}
+
+// ____________________
+// Selecciona el formulario de perfil
+
+
+// Habilitar la validación para el formulario de edición de perfil
+const profileFormValidator = new FormValidator({
+  formSelector: '.popup__container',
+  inputSelector: '.popup__input',
+  submitButtonSelector: '.popup__submit',
+  inactiveButtonClass: 'popup__submit_inactive',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'popup__input-error',
+}, profileForm);
+
+// Activa la validación
+profileFormValidator.enableValidation();
+
+// Manejar el evento de envío del formulario de edición de perfil
+profileForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  // Comprueba si el formulario es válido antes de proceder
+  if (!profileForm.checkValidity()) {
+    console.error('El formulario no es válido.'); // Mensaje de error para debugging
+    return;
+  }
+
+  const nameInput = inputName.value; // Obtener el nombre del input
+  const aboutInput = inputDescription.value; // Obtener la descripción del input
+
+  try {
+    const data = await api.updateUserProfile(nameInput, aboutInput); // Llamar a la función para actualizar el perfil en el servidor
+    updateProfileUI(data.name, data.about); // Actualizar la UI con los datos nuevos
+    popupToggle(); // Cerrar popup
+  } catch (err) {
+    console.error('Error actualizando el perfil:', err);
+  }
+});
+
+// Guardando.....
+
+popupAddCard.addEventListener('submit', async function (event) {
+  event.preventDefault();
+
+  const title = inputCardName.value.trim();
+  const imageUrl = inputCardLink.value.trim();
+
+  if (!title || !imageUrl) {
+    console.error('El título y la URL de la imagen son obligatorios.');
+    return;
+  }
+
+  const submitButton = event.target.querySelector('.popup__submit');
+  submitButton.textContent = 'Guardando...';
+  submitButton.disabled = true; 
+
+  try {
+    const newCard = await api.addCard(title, imageUrl); 
+    const card = new Card(newCard, '#mi-template', cardArea, handleCardClick, userData._id, someEventToOpenPopup);
+    cardArea.append(card.createCard()); 
+    popupAddCard.reset();
+    addCardPopupToggle(); // Cerrar popup
+  } catch (err) {
+    console.error(`Error al añadir la tarjeta: ${err}`);
+  } finally {
+    submitButton.textContent = 'Guardar'; 
+    submitButton.disabled = false;
+  }
+});
+
+// ---------------------------------
+
