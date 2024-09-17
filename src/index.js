@@ -89,7 +89,7 @@ popupAddCard.addEventListener('submit', async function (event) {
 
   try {
     const newCard = await api.addCard(title, imageUrl); // Llamamos a la función para enviar la tarjeta al servidor
-    const card = new Card(newCard, '#mi-template', cardArea, handleCardClick, userData._id, someEventToOpenPopup);
+    const card = new Card(newCard, '#mi-template', cardArea, handleCardClick, userData._id, someEventToOpenPopup, api);
     cardArea.append(card.createCard()); // Añadir la tarjeta al contenedor
 
     // Limpiar los campos del formulario
@@ -105,7 +105,7 @@ popupAddCard.addEventListener('submit', async function (event) {
 // --------------------------------------------
 function renderizarCards(cardsArray, userId) {
   cardsArray.forEach(cardData => {
-    const card = new Card(cardData, '#mi-template', cardArea, handleCardClick, userId, someEventToOpenPopup);
+    const card = new Card(cardData, '#mi-template', cardArea, handleCardClick, userId, someEventToOpenPopup, api);
     cardArea.append(card.createCard()); // Añadir la tarjeta al contenedor
   });
 }
@@ -145,7 +145,7 @@ profileForm.addEventListener('submit', async (event) => {
 
 // Función para manejar clic en la imagen de la tarjeta (abrir popup de imagen)
 function handleCardClick(link, name) {
-  const imagePopup = new PopupWithImage('.popup-image');
+  const imagePopup = new PopupWithImage('#popup-image');
   imagePopup.open(link, name); // Abre el popup con la imagen
 }
 
@@ -153,19 +153,22 @@ function handleCardClick(link, name) {
 const confirmationPopup = new PopupWithConfirmation('#popup-confirmation', handleCardDelete);
 
 // Manejar la eliminación de la tarjeta
-function handleCardDelete(cardId) {
+function handleCardDelete(cardId, removeCardCallback = null) {
   api.deleteCard(cardId)
     .then(() => {
-      const cardElement = document.querySelector(`.cards__card[data-id='${cardId}']`);
-      if (cardElement) {
-        cardElement.remove();
+      if (removeCardCallback) {
+        removeCardCallback(); // Si existe un callback, remueve la tarjeta con la callback
+      } else {
+        const cardElement = document.querySelector(`.cards__card[data-id='${cardId}']`);
+        if (cardElement) {
+          cardElement.remove(); // Remueve la tarjeta si no hay callback
+        }
       }
-      confirmationPopup.close(); // Cerrar el popup después de eliminar
+      confirmationPopup.close(); // Cerrar popup
     })
-    .catch((err) => {
-      console.error('Error al eliminar la tarjeta:', err);
-    });
+    .catch(err => console.error('Error al eliminar la tarjeta:', err));
 }
+
 
 // Función para abrir el popup de confirmación
 function someEventToOpenPopup(cardId) {
@@ -300,4 +303,7 @@ popupAddCard.addEventListener('submit', async function (event) {
 });
 
 // ---------------------------------
+
+// Inicializar el popup de confirmación
+
 

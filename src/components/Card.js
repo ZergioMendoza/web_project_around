@@ -5,6 +5,7 @@ export default class Card {
     this._link = link;
     this._likes = likes;
     this._id = _id;
+    
     this._templateSelector = templateSelector;
     this._cardArea = cardArea;
     this._handleCardClick = handleCardClick;
@@ -32,7 +33,60 @@ export default class Card {
       likeHeart.classList.remove('cards__like-color');
     }
   }
+  _removeCard() {
+    this._element.remove(); // Remueve el elemento del DOM
+    this._element = null; // Limpia la referencia al elemento
+  }
 
+
+
+  _setEventListeners() {
+
+  this._element.querySelector('.cards__like-icon').addEventListener('click', () => this._toggleLike());
+  this._element.querySelector('.cards__image').addEventListener('click', () => this._handleCardClick(this._link, this._name));
+    // Escuchar el clic en el botón de eliminar
+    this._element.querySelector('.card__delete-icon').addEventListener('click', () => {
+      // Abre el popup de confirmación (si lo tienes)
+      this._handleCardDelete();
+    });
+  }
+  
+  // Método para manejar la eliminación de la tarjeta
+  _handleCardDelete() {
+    // Aquí es donde llamamos a la API para eliminar la tarjeta
+    api.deleteCard(this._id)
+      .then(() => {
+        // Elimina la tarjeta del DOM solo si la eliminación fue exitosa
+        this._element.remove();
+      })
+      .catch(err => {
+        console.log('Error al intentar eliminar la tarjeta:', err);
+      });
+  }
+
+  _handleCardDelete() {
+    // Abre un popup de confirmación
+    confirmationPopup.open(() => {
+      api.deleteCard(this._id)
+        .then(() => {
+          this._element.remove();
+        })
+        .catch(err => {
+          console.log('Error al intentar eliminar la tarjeta:', err);
+        });
+    });
+  }
+    
+
+  //   const deleteButton = this.getDeleteButton();
+  //   // Solo permitir eliminar si el usuario es propietario de la tarjeta
+  //   if (this._ownerId === this._userId) {
+  //     deleteButton.style.display = 'block';
+  //     deleteButton.addEventListener('click', () => this._openDeletePopup(this._id, this._removeCard.bind(this))); // Pasar callback para eliminar del DOM
+  //   } else {
+  //     deleteButton.style.display = 'none';
+  //   }
+  // }
   getDeleteButton() {
     return this._element.querySelector('.cards__delete-icon');
   }
@@ -63,7 +117,10 @@ export default class Card {
   _setEventListeners() {
     this._element.querySelector('.cards__like-icon').addEventListener('click', () => this._toggleLike());
     this._element.querySelector('.cards__image').addEventListener('click', () => this._handleCardClick(this._link, this._name));
+    this._element.querySelector(".cards__delete-icon").addEventListener('click',() => console.log("ejecutar evento borrar"));
   }
+
+  // llamar la api y un a vez haya borrado la  remover la card y usar this.elementthis._element.querySelector(".cards__delete-icon").addEventListener
 
   _toggleLike() {
     if (this._likes.some(user => user._id === this._userId)) {
