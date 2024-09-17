@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import PopupWithConfirmation from './components/PopupWithConfirmation.js'; // Ajusta la ruta según tu estructura de carpetas
 import "./components/index.css";
 import Api from "./components/api.js";
@@ -8,6 +9,17 @@ import UserInfo from "./components/UserInfo.js";
 import FormValidator from "./components/FormValidator.js";
 import PopupWithImage from './components/PopupWithImage.js'; // Asegúrate de importar PopupWithImage
 import {
+=======
+import "./components/index.css";
+import Section from "./components/Section.js";
+import Card from "./components/Card.js";
+import PopupWithImage from "./components/PopupWithImage.js";
+import PopupWithForm from "./components/PopUpWithForms.js";
+import UserInfo from "./components/UserInfo.js";
+import FormValidator from "./components/FormValidator.js";
+import {
+  initialCards,
+>>>>>>> 913926f9301b5ebc663ec0e2a261d70e89cc096c
   template,
   cardArea,
   popupAddCard,
@@ -20,6 +32,7 @@ import {
   profileAbout,
   inputName,
   inputDescription,
+<<<<<<< HEAD
   openCards,
   closeEscape,
   dblclickClose,
@@ -181,11 +194,76 @@ openCards();
 closeEscape();
 dblclickClose();
 dblclickClosed();
+=======
+} from "./utils.js";
+
+// Instancia de PopupWithImage
+const popupWithImage = new PopupWithImage("#popup-image");
+
+// Función para manejar el clic en la tarjeta
+const handleCardClick = (imageSrc, imageAlt) => {
+  popupWithImage.open(imageSrc, imageAlt);
+};
+
+// Crear una instancia de Section con las tarjetas iniciales
+const section = new Section(
+  {
+    items: initialCards,
+    renderer: createCard,
+  },
+  ".cards"
+);
+
+// Renderizar todas las tarjetas iniciales
+section.renderItems();
+
+// Configurar los event listeners para los popups
+popupAddCardInstance.setEventListeners();
+popupEditProfile.setEventListeners();
+popupWithImage.setEventListeners();
+
+// Configurar eventos para los botones
+closeButton.addEventListener("click", () => popupEditProfile.close());
+editButton.addEventListener("click", () => {
+  const userData = userInfo.getUserInfo();
+  inputName.value = userData.name;
+  inputDescription.value = userData.about;
+  popupEditProfile.open();
+});
+submitButton.addEventListener("click", function (evt) {
+  evt.preventDefault();
+  userInfo.setUserInfo({
+    name: inputName.value,
+    about: inputDescription.value,
+  });
+  popupEditProfile.close();
+});
+
+// Función para manejar el envío del formulario de añadir tarjeta
+const handleAddCardSubmit = (data) => {
+  const card = new Card(
+    data["title"],
+    data["image-url"],
+    "#mi-template",
+    cardArea,
+    handleCardClick
+  );
+  card.render();
+};
+
+// Función para manejar el envío del formulario de edición de perfil
+const handleProfileEditSubmit = (data) => {
+  userInfo.setUserInfo(data);
+};
+>>>>>>> 913926f9301b5ebc663ec0e2a261d70e89cc096c
 
 // Habilitar la validación de formularios
 const enableValidation = (settings) => {
   const formList = Array.from(document.querySelectorAll(settings.formSelector));
+<<<<<<< HEAD
 
+=======
+>>>>>>> 913926f9301b5ebc663ec0e2a261d70e89cc096c
   formList.forEach((formElement) => {
     const formValidator = new FormValidator(settings, formElement);
     formValidator.enableValidation();
@@ -194,6 +272,7 @@ const enableValidation = (settings) => {
 
 // Llamada para habilitar la validación con los selectores y clases específicas
 enableValidation({
+<<<<<<< HEAD
   formSelector: '.popup__container', // Selector del formulario
   inputSelector: '.popup__input', // Selector de los campos de entrada
   submitButtonSelector: '.popup__submit', // Selector del botón de envío
@@ -307,3 +386,12 @@ popupAddCard.addEventListener('submit', async function (event) {
 // Inicializar el popup de confirmación
 
 
+=======
+  formSelector: ".popup__container",
+  inputSelector: ".popup__input",
+  submitButtonSelector: ".popup__submit",
+  inactiveButtonClass: "popup__submit_inactive",
+  inputErrorClass: "popup__input_type_error",
+  errorClass: "popup__input-error",
+});
+>>>>>>> 913926f9301b5ebc663ec0e2a261d70e89cc096c

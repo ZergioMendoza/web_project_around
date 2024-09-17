@@ -3,8 +3,13 @@ import Popup from "./PopUp.js";
 export default class PopupWithImage extends Popup {
   constructor(popupSelector) {
     super(popupSelector);
+<<<<<<< HEAD
     this._image = this._popupElement.querySelector(".popup__image");
     this._caption = this._popupElement.querySelector(".popup__caption");
+=======
+    this._image = this._popup.querySelector(".popup__image");
+    this._caption = this._popup.querySelector(".popup__caption");
+>>>>>>> 913926f9301b5ebc663ec0e2a261d70e89cc096c
   }
 
   open(imageSrc, imageAlt) {
@@ -16,6 +21,12 @@ export default class PopupWithImage extends Popup {
 
   setEventListeners() {
     super.setEventListeners(); // Configura los event listeners del Popup
+<<<<<<< HEAD
     
+=======
+    this._popup
+      .querySelector(".popup__close")
+      .addEventListener("click", () => this.close());
+>>>>>>> 913926f9301b5ebc663ec0e2a261d70e89cc096c
   }
 }

@@ -72,7 +72,11 @@
 }
 
 .popup__close {
+<<<<<<< HEAD
   background: url(../images/icon/close-button.svg) no-repeat transparent center;
+=======
+  background: url(/images/icon/close-button.svg) no-repeat transparent center;
+>>>>>>> 913926f9301b5ebc663ec0e2a261d70e89cc096c
   width: 2.5rem;
   height: 2.5rem;
   border: none;

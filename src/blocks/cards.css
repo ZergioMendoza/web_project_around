@@ -72,6 +72,7 @@
   margin: 0;
 }
 
+<<<<<<< HEAD
 .cards__like-count {
   font-size: 1rem;
   margin-left: 10px;
@@ -83,6 +84,8 @@
   color: red; /* Cambia a un color que prefieras */
 }
 
+=======
+>>>>>>> 913926f9301b5ebc663ec0e2a261d70e89cc096c
 @media screen and (max-width: 992px) {
   .cards {
     grid-template-columns: repeat(2, 1fr);
@@ -99,7 +102,12 @@
 
 /* TEMPLATE */
 
+<<<<<<< HEAD
 
+=======
+.template {
+}
+>>>>>>> 913926f9301b5ebc663ec0e2a261d70e89cc096c
 
 .item {
   background-color: #f51818;
