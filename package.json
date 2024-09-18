@@ -5,14 +5,13 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
-<<<<<<< HEAD
+
     "start": "webpack serve --mode production",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
     
-=======
-    "start": "webpack serve --mode production"
->>>>>>> 913926f9301b5ebc663ec0e2a261d70e89cc096c
+
+
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

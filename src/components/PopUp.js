@@ -48,10 +48,3 @@ export default class Popup {
       document.removeEventListener('keydown', this._handleEscClose);
     }
   }
-<<<<<<< HEAD
-  
-// ____________________________________
-  // Crear una instancia de Popup para el popup de cambiar la imagen de perfil
-=======
-  
->>>>>>> 913926f9301b5ebc663ec0e2a261d70e89cc096c
