@@ -144,8 +144,9 @@ profileForm.addEventListener('submit', async (event) => {
 });
 
 // Función para manejar clic en la imagen de la tarjeta (abrir popup de imagen)
+const imagePopup = new PopupWithImage('.popup__image');
 function handleCardClick(link, name) {
-  const imagePopup = new PopupWithImage('#popup-image');
+  // const imagePopup = new PopupWithImage('.popup__image');
   imagePopup.open(link, name); // Abre el popup con la imagen
 }
 

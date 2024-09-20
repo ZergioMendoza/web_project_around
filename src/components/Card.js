@@ -38,6 +38,7 @@ export default class Card
 
 
 
+
   _setEventListeners() {
 
   this._element.querySelector('.cards__like-icon').addEventListener('click', () => this._toggleLike());
@@ -112,11 +113,11 @@ export default class Card
     return this._element; // Asegúrate de retornar el elemento
   }
 
-  // _setEventListeners() {
-  //   this._element.querySelector('.cards__like-icon').addEventListener('click', () => this._toggleLike());
-  //   this._element.querySelector('.cards__image').addEventListener('click', () => this._handleCardClick(this._link, this._name));
-  //   this._element.querySelector(".cards__delete-icon").addEventListener('click',() => console.log("ejecutar evento borrar"));
-  // }
+  _setEventListeners() {
+    this._element.querySelector('.cards__like-icon').addEventListener('click', () => this._toggleLike());
+    this._element.querySelector('.cards__image').addEventListener('click', () => this._handleCardClick(this._link, this._name));
+    this._element.querySelector(".cards__delete-icon").addEventListener('click',() => console.log("ejecutar evento borrar"));
+  }
 
   // llamar la api y un a vez haya borrado la  remover la card y usar this.elementthis._element.querySelector(".cards__delete-icon").addEventListener
 
